@@ -3,8 +3,8 @@
 ### - Ashila Ghassani A
 ### - Euis Wulan
 ### - Nadia Apriliani
-### -
-### -
+### - Indri Sarah Sinaga
+### - Ningrum Caesarena Angela Samudra
 
 # Link Figjam : 
 https://www.figma.com/file/7e55j9tgRgRhrWm8Mih8Co/Information-Architecture?type=whiteboard&t=igSmLodZPH3pnPJD-1
