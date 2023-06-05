@@ -3,43 +3,61 @@
 
 {%  block content %}
 <div class="row">
-	<div class="col-lg-4">
-        <img class="thumbnail" src="{% static 'images/placeholder.png' %}">
-        <div class="box-element product">
-            <h6><strong>Product</strong></h6>
-            <hr>
-    
-            <button  class="btn btn-outline-secondary add-btn">Add to Cart</button>
-            <a class="btn btn-outline-success" href="#">View</a>
-            <h4 style="display: inline-block; float: right"><strong>$20</strong></h4>
-    
-        </div>
-    </div>
+    <!-- For making sorting functionality -->
+    <select name="sort" id="sort-list" onchange="location = finalurl();" style="margin-left: auto;">
+        <option value="" id="placeholder" disabled selected hidden>Sort</option>
+        <option id="price" value="price">Price: Low To High</option>
+        <option id="-price" value="-price">Price: High To Low</option>
+        <option id="name" value="name">Book Name</option>
+        <option id="author_name" value="author_name">Author Name</option>
+    </select>
+</div>
 
-	<div class="col-lg-4">
-        <img class="thumbnail" src="{% static 'images/placeholder.png' %}">
-        <div class="box-element product">
-            <h6><strong>Product</strong></h6>
-            <hr>
-    
-            <button  class="btn btn-outline-secondary add-btn">Add to Cart</button>
-            <a class="btn btn-outline-success" href="#">View</a>
-            <h4 style="display: inline-block; float: right"><strong>$15</strong></h4>
-    
-        </div>
-    </div>
+<br>
 
-	<div class="col-lg-4">
-        <img class="thumbnail" src="{% static 'images/placeholder.png' %}">
+<div class="row">
+    {% for product in products %}
+    <div class="col-lg-3" style="margin-bottom: 50px;">
+        <img class="thumbnail" src="{{product.imageURL}}">
         <div class="box-element product">
-            <h6><strong>Product</strong></h6>
+            <h6><strong>{{product.name}}</strong></h6>
             <hr>
-    
-            <button  class="btn btn-outline-secondary add-btn">Add to Cart</button>
-            <a class="btn btn-outline-success" href="#">View</a>
-            <h4 style="display: inline-block; float: right"><strong>$10</strong></h4>
-    
+            <p><strong>{{product.author_name}}</strong></p>
+            <p><strong>Rp{{product.price|floatformat:2}}</strong></p>
+
+            <button data-product="{{product.id}}" data-action="add" class="btn btn-outline-secondary add-btn update-cart">Add to Cart</button>
+            
+            <a class="btn btn-outline-success" href="{% url 'product_detail' product.pid %}">View</a>
         </div>
     </div>
+    {% endfor %}
 </div>
 {%  endblock content %}
+
+{% block js %}
+<script>
+    // for getting the sorting status to be displayed in sorting dropdown placeholder
+    function get(name) {
+      if (name = (new RegExp('[?&]' + encodeURIComponent(name) + '=([^&]*)')).exec(location.search))  //location.search give query sling part
+        return decodeURIComponent(name[1]);
+    }
+  
+    if(get('ordering'))
+    document.getElementById('placeholder').innerHTML = "Sort: " + document.getElementById(get('ordering')).innerHTML;
+  
+    // for getting url after applying ordering
+    function finalurl() {
+      var url = new URL(window.location.href);
+      var search_params = url.searchParams;
+      search_params.set('ordering', document.getElementById("sort-list").value);
+      url.search = search_params.toString();
+      var new_url = url.toString();
+      return new_url
+    }
+    </script>
+  
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+  {% endblock %}
+  

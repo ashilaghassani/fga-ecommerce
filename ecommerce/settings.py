@@ -77,8 +77,12 @@ WSGI_APPLICATION = 'ecommerce.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'ecomm',
+        'USER': 'postgres',
+        'PASSWORD': 'koreanime',
+        'HOST':'127.0.0.1',
+        'PORT': '5432' 
     }
 }
 
@@ -127,3 +131,8 @@ STATICFILES_DIRS = [
 ]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+MEDIA_URL = '/images/'
+
+# nyimpan gambar ke folder static
+MEDIA_ROOT = os.path.join(BASE_DIR, 'static/images')
