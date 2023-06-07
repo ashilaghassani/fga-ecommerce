@@ -97,3 +97,85 @@ h1,h2,h3,h4,h5,h6{
 .hidden{
 	display: none!important;
 }
+
+section{
+	padding: 5rem 9%;
+}
+
+/* .home{
+	/* background: url(../images/bg.jpg) no-repeat; 
+	background-size: cover;
+	background-position: center;
+} */
+
+.home .row{
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap:1.5rem;
+}
+
+.home .row .content{
+	flex:1 1 42rem;
+}
+
+.home .row .books-slider{
+	flex:1 1 42rem;
+	text-align: center;
+	margin-top: 2rem;
+}
+
+.home .row .books-slider a img{
+	flex:1 1 42rem;
+	text-align: center;
+	margin-top: 2rem;
+}
+
+
+
+.books-slider .wrapper {
+	display: flex;
+	gap: 10px; /* Adjust the gap between images as needed */
+  }
+  
+  .books-slider {
+	flex: 1;
+  }
+  
+  .books-slider img {
+	width: 100%;
+	height: auto;
+	object-fit: cover;
+  }
+
+  .home .row .books-slider  a:hover img {
+	transform: scale(0.9);
+  }
+
+
+  .home .row .books-slider .stand {
+	width: 100%;
+	margin-top: -2rem;
+  }
+
+/* .home .row .books-slider  a:hover img {
+	transform: scale(0.9);
+  }
+
+
+  .home .row .books-slider .stand{
+	width: 100%;
+	margin-top: -2rem;
+  }
+  
+.home .row .content h3{
+	color: var(--black);
+	font-size: 4.5rem;
+}
+
+.home .row .content p{
+	color: var(--light-color);
+	font-size: 1.4rem;
+	line-height: 2;
+	padding: 1rem 0;
+}*/

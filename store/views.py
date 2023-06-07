@@ -7,6 +7,8 @@ from .forms import CreateUserForm
 from django.contrib.auth import authenticate,login,logout
 from django.contrib.auth.decorators import login_required  
 
+from django_ratelimit.decorators import ratelimit
+
 
 
 import json
@@ -14,9 +16,9 @@ import datetime
 
 # Create your views here.
 
-def main(request):
+def home(request):
     context ={}
-    return render(request,'store/main.html',context)
+    return render(request,'store/home.html',context)
 
 def registerPage(request):
     form = CreateUserForm()
@@ -33,6 +35,7 @@ def registerPage(request):
     context ={'form':form}
     return render(request,'store/register.html',context)
 
+@ratelimit(key='user', rate='5/m', method=['POST'])
 def loginPage(request):
     if request.method =='POST':
         username = request.POST.get('username')
@@ -42,7 +45,7 @@ def loginPage(request):
 
         if user is not None:
             login(request, user)
-            return redirect('main')
+            return redirect('home')
         else:
             messages.info(request, 'Username or password is incorrect')
        
@@ -55,10 +58,25 @@ def logoutUser(request):
     return redirect('login')
 
 
+def contact(request):
+
+    if request.method == 'POST':
+        name = request.POST['name']
+        email = request.POST['email']
+        message = request.POST['message']
+        data = Contact(name=name,email=email, message=message)
+        data.save()
+        context = {'form_created': True}
+        return render(request, 'store/contact.html',context)
+    else:
+        return render(request,'store/contact.html')
+
+
 # store = ngembaliin list produk
 def store(request):
     # ambil produk dari database
     ordering = request.GET.get('ordering', "")  
+    category_filter = request.GET.getlist('category')
 
     if request.user.is_authenticated:
         customer = request.user.customer
@@ -71,33 +89,37 @@ def store(request):
         order = {'get_cart_total':0, 'get_cart_items':0,'shipping':False}
         cartItems = order['get_cart_items']
 
-    product = Product.objects.all()
+    products = Product.objects.all()
 
     if ordering:
-        products = product.order_by(ordering) 
-    else :
-        products = product
+        products = products.order_by(ordering) 
+    if category_filter:
+        products = products.filter(kategori__in=category_filter)
+  
   
 
-    context = {'products':products, 'cartItems': cartItems}
+    context = {'products':products, 'cartItems': cartItems, 'selected_categories': category_filter}
     return render(request,'store/store.html',context)
 
 def product_detail(request,pid):
+    
+    product = Product.objects.get(pid=pid) 
+    additional_images = product.additional_images.all()
 
     if request.user.is_authenticated:
         customer = request.user.customer
         order, created = Order.objects.get_or_create(customer=customer, complete = False)
         items = order.orderitem_set.all
         cartItems = order.get_cart_items
-
+        order_items = OrderItem.objects.filter(product=product, order=order)
+        productItem = sum(item.quantity for item in order_items)
     else:
         items = []
-        order = {'get_cart_total':0, 'get_cart_items':0,'shipping':False}
+        order = {'get_cart_total':0, 'get_cart_items':0,'get_product_item':0,'shipping':False}
         cartItems = order['get_cart_items']
+        productItem = 0
 
-
-    product = Product.objects.get(pid=pid)   
-    context = {'product':product, 'cartItems': cartItems}
+    context = {'product':product, 'cartItems': cartItems, 'productItem':productItem, 'additional_images': additional_images}
     
     return render(request,'store/product_detail.html',context)
 
@@ -156,7 +178,7 @@ def updateItem(request):
  
     if orderItem.quantity <= 0:
         orderItem.delete()
-    return JsonResponse('udh di update', safe =False)
+    return JsonResponse('udh di update', safe=False)
 
 @login_required(login_url='login')
 def processOrder(request):

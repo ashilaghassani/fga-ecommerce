@@ -11,6 +11,19 @@ class Customer(models.Model):
     def __str__(self):
         return self.name if self.name else ''
 
+PILIHAN_LABEL = (
+	('NEW','info'),
+	('SALE','danger'),
+	('BEST', 'primary'),
+)
+
+PILIHAN_KATEGORY = (
+	('NV','Novel'),
+	('CM','Comic'),
+	('MG', 'Magazine'),
+	('EC', 'Encyclopedia'),
+)
+
 
 class Product(models.Model):
 	pid = models.IntegerField(null=True)
@@ -19,8 +32,11 @@ class Product(models.Model):
 	tahun = models.IntegerField(null=True)
 	deskripsi =  models.TextField(null=True)
 	price = models.DecimalField(max_digits=30,decimal_places=2)
-	digital = models.BooleanField(default=False,null=True, blank=True)
+	discount_price = models.DecimalField(max_digits=30,decimal_places=2,null=True)
 	image = models.ImageField(null=True, blank=True)
+	label = models.CharField(choices=PILIHAN_LABEL,max_length=4,null=True)
+	kategori = models.CharField(choices=PILIHAN_KATEGORY,max_length=2,null=True)
+	digital = models.BooleanField(default=False,null=True, blank=True)
 
 	def __str__(self):
 		return self.name
@@ -35,6 +51,13 @@ class Product(models.Model):
 	
 	class Meta:
 		ordering =['name']
+
+class AdditionalImage(models.Model):
+    product = models.ForeignKey(Product, related_name='additional_images', on_delete=models.CASCADE)
+    image = models.ImageField()
+
+    def __str__(self):
+        return self.image.url
     
 
 class Order(models.Model):
@@ -49,14 +72,31 @@ class Order(models.Model):
 	@property
 	def get_cart_total(self):
 		orderitems = self.orderitem_set.all()
-		total = sum([item.get_total for item in orderitems])
-		return total 
+		total = 0
+		for item in orderitems:
+			product = item.product
+			if product.discount_price and product.discount_price != 0:
+				total += product.discount_price * item.quantity
+			else:
+				total += product.price * item.quantity
+		return total
+ 
 	
 	@property
 	def get_cart_items(self):
 		orderitems = self.orderitem_set.all()
 		total = sum([item.quantity for item in orderitems])
 		return total 
+	
+	@property
+	def get_discount_amount(self):
+		orderitems = self.orderitem_set.all()
+		discount_amount = 0
+		for item in orderitems:
+			product = item.product
+			if product.discount_price and product.discount_price != 0:
+				discount_amount += (product.price - product.discount_price) * item.quantity
+		return discount_amount
 	
 	@property
 	def shipping(self):
@@ -78,8 +118,21 @@ class OrderItem(models.Model):
 	
 	@property
 	def get_total(self):
-		total = self.product.price * self.quantity
+		total = 0
+		if self.product.discount_price and self.product.discount_price != 0:
+			total = self.product.discount_price * self.quantity
+		else:
+			total = self.product.price * self.quantity
 		return total
+	
+	@property
+	def get_discount_amount(self):
+		if self.product.discount_price and self.product.discount_price != 0:
+			discount_amount = (self.product.price - self.product.discount_price) * self.quantity
+		else:
+			discount_amount = 0
+		return discount_amount
+	
 
 class ShippingAddress(models.Model):
 	customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True)
@@ -92,3 +145,11 @@ class ShippingAddress(models.Model):
 
 	def __str__(self):
 		return self.address
+	
+
+class Contact(models.Model):
+    name = models.CharField(max_length=250)
+    email = models.EmailField()
+    message = models.TextField(max_length=1200)
+    def __str__(self):
+        return self.email

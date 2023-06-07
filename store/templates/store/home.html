@@ -1,0 +1,71 @@
+{% extends 'store/main.html' %}
+{% load static %}
+
+{% block content %}
+{% if user.is_authenticated %}
+    <h1>Hi, {{ user.username }}!</h1>
+{% endif %}
+<section class="home" id="home">
+    <div class="row">
+      <div class="content">
+        <h3>Upto 75% off</h3>
+        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Vel, illum tempora a eius vitae sunt corporis expedita fugiat quaerat magnam aspernatur repellendus
+          deserunt eaque nesciunt modi, officiis temporibus doloribus nemo!</p>
+        <a class="btn btn-info" href="{% url 'store' %}">Shop Now</a>
+      </div>
+    </div>
+  <br>
+  <br>
+    <div class="books-slider">
+        <div class="wrapper">
+          
+            <a href="#"><img src="/static/images/book1.jpg" alt=""></a>
+        
+        
+            <a href="#"><img src="/static/images/book2.jpg" alt=""></a>
+     
+            <a href="#"><img src="/static/images/book3.jpg" alt=""></a>
+        
+            <a href="#"><img src="/static/images/book4.jpg" alt=""></a>
+  
+            <a href="#"><img src="/static/images/book5.jpg" alt=""></a>
+       
+          
+            <a href="#"><img src="/static/images/book6.jpg" alt=""></a>
+        
+        </div>
+       
+
+      
+            <a href="#"><img src="/static/images/stand.jpg" class="stand" alt=""></a>
+        
+
+      </div>
+      
+  </section>
+  
+  <script>
+    const images = document.querySelectorAll('.books-slider .wrapper img');
+
+    images.forEach(image => {
+    image.addEventListener('load', () => {
+        const aspectRatio = image.naturalWidth / image.naturalHeight;
+        const desiredHeight = 20 * 10; // Change the desired height as needed
+        const desiredWidth = desiredHeight * aspectRatio;
+
+        image.style.width = `${desiredWidth}px`;
+        image.style.height = `${desiredHeight}px`;
+
+        // Add hover effect
+        image.addEventListener('mouseover', () => {
+        image.style.transform = 'scale(0.9)';
+        });
+
+        image.addEventListener('mouseout', () => {
+        image.style.transform = 'scale(1)';
+        });
+    });
+    });
+
+  </script>
+{% endblock %}

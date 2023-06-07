@@ -4,10 +4,11 @@ from . import views
 
 urlpatterns = [
 	#Leave as empty string for base url
-	path('', views.main, name="main"),
+	path('', views.home, name="home"),
     
 	path('store/', views.store, name="store"),
     path('product/<pid>', views.product_detail, name="product_detail"),
+    path('contact/', views.contact, name="contact"),
     
 	path('cart/', views.cart, name="cart"),
 	path('checkout/', views.checkout, name="checkout"),

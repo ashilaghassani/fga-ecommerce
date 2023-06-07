@@ -1,17 +1,55 @@
 {% extends 'store/main.html' %}
 {% load static %}
 
-{%  block content %}
+{% block content %}
 <div class="row">
-    <!-- For making sorting functionality -->
-    <select name="sort" id="sort-list" onchange="location = finalurl();" style="margin-left: auto;">
-        <option value="" id="placeholder" disabled selected hidden>Sort</option>
-        <option id="price" value="price">Price: Low To High</option>
-        <option id="-price" value="-price">Price: High To Low</option>
-        <option id="name" value="name">Book Name</option>
-        <option id="author_name" value="author_name">Author Name</option>
-    </select>
+    <form method="GET" id="filterForm">
+        <div class="col-lg-3">
+            <!-- Filter Dropdown -->
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="filterDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Filter Category
+                </button>
+                <div class="dropdown-menu" aria-labelledby="filterDropdown">
+                    <!-- Category Filter -->
+                    <label class="dropdown-item">
+                        <input type="checkbox" name="category" value="NV" {% if 'NV' in selected_categories or not selected_categories %}checked{% endif %} onchange="submitForm();">
+                        Novel
+                    </label>
+                    <label class="dropdown-item">
+                        <input type="checkbox" name="category" value="CM" {% if 'CM' in selected_categories or not selected_categories %}checked{% endif %} onchange="submitForm();">
+                        Comic
+                    </label>
+                    <label class="dropdown-item">
+                        <input type="checkbox" name="category" value="MG" {% if 'MG' in selected_categories or not selected_categories %}checked{% endif %} onchange="submitForm();">
+                        Magazine
+                    </label>
+                    <label class="dropdown-item">
+                        <input type="checkbox" name="category" value="EC" {% if 'EC' in selected_categories or not selected_categories %}checked{% endif %} onchange="submitForm();">
+                        Encyclopedia
+                    </label>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <div class="col-lg-3">
+        <!-- Other Dropdown -->
+        <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="sortDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Other Filter
+                <span id="placeholder"></span>
+            </button>
+            <div class="dropdown-menu" aria-labelledby="sortDropdown">
+                <a class="dropdown-item" href="#" onclick="finalurl('price')">Price: Low To High</a>
+                <a class="dropdown-item" href="#" onclick="finalurl('-price')">Price: High To Low</a>
+                <a class="dropdown-item" href="#" onclick="finalurl('name')">Book Name</a>
+                <a class="dropdown-item" href="#" onclick="finalurl('author_name')">Author Name</a>
+            </div>
+        </div>
+    </div>
 </div>
+
 
 <br>
 
@@ -20,12 +58,23 @@
     <div class="col-lg-3" style="margin-bottom: 50px;">
         <img class="thumbnail" src="{{product.imageURL}}">
         <div class="box-element product">
-            <h6><strong>{{product.name}}</strong></h6>
+            <div class="d-flex justify-content-between align-items-center">
+                <h6><strong>{{product.name}}</strong></h6>
+                <h6><span class="badge bg-{{ product.get_label_display }}" style="color: white;">{{ product.label }}</span></h6>
+            </div>
             <hr>
-            <p><strong>{{product.author_name}}</strong></p>
-            <p><strong>Rp{{product.price|floatformat:2}}</strong></p>
+            <p>{{product.author_name}}</p>
+            <p>{{product.get_kategori_display}}</p>
+            <div class="mb-3">
+                {% if product.label == 'SALE' and product.discount_price != 0 %}
+                  <span class="h5" style="text-decoration: line-through; margin-right: 10px;">${{ product.price|floatformat:2 }}</span>
+                  <span class="h5">${{ product.discount_price|floatformat:2 }}</span>
+                {% else %}
+                  <span class="h5">${{ product.price|floatformat:2 }}</span>
+                {% endif %}
+            </div>
 
-            <button data-product="{{product.id}}" data-action="add" class="btn btn-outline-secondary add-btn update-cart">Add to Cart</button>
+            <!-- <button data-product="{{product.id}}" data-action="add" class="btn btn-outline-secondary add-btn update-cart">Add to Cart</button> -->
             
             <a class="btn btn-outline-success" href="{% url 'product_detail' product.pid %}">View</a>
         </div>
@@ -36,6 +85,16 @@
 
 {% block js %}
 <script>
+     window.addEventListener('DOMContentLoaded', (event) => {
+        var checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        var selectedCategories = "{{ selected_categories }}".split(",");
+        checkboxes.forEach(function(checkbox) {
+            if (selectedCategories.includes(checkbox.value) || selectedCategories.length === 0) {
+                checkbox.checked = true;
+            }
+        });
+    });
+
     // for getting the sorting status to be displayed in sorting dropdown placeholder
     function get(name) {
       if (name = (new RegExp('[?&]' + encodeURIComponent(name) + '=([^&]*)')).exec(location.search))  //location.search give query sling part
@@ -45,19 +104,22 @@
     if(get('ordering'))
     document.getElementById('placeholder').innerHTML = "Sort: " + document.getElementById(get('ordering')).innerHTML;
   
+    function submitForm() {
+        document.getElementById('filterForm').submit();
+    }
+
     // for getting url after applying ordering
-    function finalurl() {
-      var url = new URL(window.location.href);
-      var search_params = url.searchParams;
-      search_params.set('ordering', document.getElementById("sort-list").value);
-      url.search = search_params.toString();
-      var new_url = url.toString();
-      return new_url
+    function finalurl(ordering) {
+        var url = new URL(window.location.href);
+        var search_params = url.searchParams;
+        search_params.set('ordering', ordering);
+        url.search = search_params.toString();
+        var new_url = url.toString();
+        window.location.href = new_url;
     }
     </script>
   
   <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
-  {% endblock %}
-  
+{% endblock %}
